@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using WebAPI.Models;
 
 namespace WebAPI.Controllers
 {
@@ -26,19 +27,45 @@ namespace WebAPI.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
-        public IEnumerable<FinancialData> Get()
+        /// <summary>
+        /// https://localhost:44378/webapi/
+        /// https://localhost:44378/webapi/details?length=5
+        /// https://localhost:44378/webapi/details?length=2&&live=true
+        /// </summary>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        [HttpGet("{details?}")]
+        public IEnumerable<FinancialData> Get(int length, bool live)
         {
-            //var rng = new Random();
-            //return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            //{
-            //    Date = DateTime.Now.AddDays(index),
-            //    TemperatureC = rng.Next(-20, 55),
-            //    Summary = Summaries[rng.Next(Summaries.Length)]
-            //})
-            //.ToArray();
+            FinancialData[] dataArray = JsonConvert.DeserializeObject<List<FinancialData>>(jsonData).ToArray();
+            Helper helper = new Helper();
 
-            return JsonConvert.DeserializeObject<List<FinancialData>>(jsonData).ToArray();
+            if (length != 0)
+            {
+                // dataArray = JsonConvert.DeserializeObject<List<FinancialData>>(jsonData).ToArray().Take(length).ToArray()
+                dataArray = helper.generatedata(dataArray, length);
+            }
+
+            if (live)
+            {
+                var rng = new Random();
+                //FinancialData[] updatedArray = Enumerable.Range(1, length).Select(index => new FinancialData
+                //{
+                //    Date = DateTime.Now.AddDays(index),
+                //    TemperatureC = rng.Next(-20, 55),
+                //    Summary = Summaries[rng.Next(Summaries.Length)]
+                //}).ToArra();
+            }
+            ////return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            ////{
+            ////    Date = DateTime.Now.AddDays(index),
+            ////    TemperatureC = rng.Next(-20, 55),
+            ////    Summary = Summaries[rng.Next(Summaries.Length)]
+            ////})
+            ////.ToArray();
+
+
+            return dataArray;
         }
     }
 }

@@ -19,3 +19,4 @@ C:\Users\zkolev\source\repos\WebAPI\WebAPI\bin\Debug\netcoreapp3.1\Newtonsoft.Js
 C:\Users\zkolev\source\repos\WebAPI\WebAPI\obj\Debug\netcoreapp3.1\WebAPI.csproj.CoreCompileInputs.cache
 C:\Users\zkolev\source\repos\WebAPI\WebAPI\obj\Debug\netcoreapp3.1\WebAPI.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\zkolev\source\repos\WebAPI\WebAPI\obj\Debug\netcoreapp3.1\WebAPI.csproj.CopyComplete
+C:\Users\zkolev\source\repos\WebAPI\WebAPI\obj\Debug\netcoreapp3.1\WebAPI.csprojAssemblyReference.cache
