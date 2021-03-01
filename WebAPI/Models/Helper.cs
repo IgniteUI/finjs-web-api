@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -61,10 +62,15 @@ namespace WebAPI.Models
         {
             "Forwards", "Futures", "Options", "Swap", "CFD"
         };
-
+        /// <summary>
+        /// Generates new data based on passed length
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="newCount"></param>
+        /// <returns></returns>
         public FinancialData[] generatedata(FinancialData[] data, int newCount)
         {
-            
+
             FinancialData[] newData = new FinancialData[newCount];
             var rng = new Random();
             var getRandomDate = RandomDayFunc();
@@ -78,14 +84,14 @@ namespace WebAPI.Models
                 finDataEntity.Settlement = Settlements[rng.Next(2)];
                 finDataEntity.Contract = Contracts[rng.Next(5)];
                 finDataEntity.LastUpdated = getRandomDate();
-                finDataEntity.OpenPriceDiff = Math.Round((((finDataEntity.OpenPrice - finDataEntity.Price) / finDataEntity.Price) * 100) * 150, 4);
-                finDataEntity.BuyDiff = Math.Round((((finDataEntity.Buy - finDataEntity.Price) / finDataEntity.Price) * 100) * 150, 4);
-                finDataEntity.SellDiff = Math.Round((((finDataEntity.Sell - finDataEntity.Price) / finDataEntity.Price) * 100) * 150, 4);
-                finDataEntity.StartYDiff = Math.Round((((finDataEntity.StartY - finDataEntity.Price) / finDataEntity.Price) * 100) * 150, 4);
-                finDataEntity.HighYDiff = Math.Round((((finDataEntity.HighY - finDataEntity.Price) / finDataEntity.Price) * 100) * 150, 4);
-                finDataEntity.LowYDiff = Math.Round((((finDataEntity.LowY- finDataEntity.Price) / finDataEntity.Price) * 100) * 150, 4);
-                finDataEntity.HighDDiff = Math.Round((((finDataEntity.HighD - finDataEntity.Price) / finDataEntity.Price) * 100) * 150, 4);
-                finDataEntity.LowDDiff = Math.Round((((finDataEntity.LowD - finDataEntity.Price) / finDataEntity.Price) * 100) * 150, 4);
+                finDataEntity.OpenPriceDiff = Math.Round((((finDataEntity.OpenPrice - finDataEntity.Price) / finDataEntity.Price) * 100) * 15, 4);
+                finDataEntity.BuyDiff = Math.Round((((finDataEntity.Buy - finDataEntity.Price) / finDataEntity.Price) * 100) * 15, 4);
+                finDataEntity.SellDiff = Math.Round((((finDataEntity.Sell - finDataEntity.Price) / finDataEntity.Price) * 100) * 15, 4);
+                finDataEntity.StartYDiff = Math.Round((((finDataEntity.StartY - finDataEntity.Price) / finDataEntity.Price) * 100) * 15, 4);
+                finDataEntity.HighYDiff = Math.Round((((finDataEntity.HighY - finDataEntity.Price) / finDataEntity.Price) * 100) * 15, 4);
+                finDataEntity.LowYDiff = Math.Round((((finDataEntity.LowY - finDataEntity.Price) / finDataEntity.Price) * 100) * 15, 4);
+                finDataEntity.HighDDiff = Math.Round((((finDataEntity.HighD - finDataEntity.Price) / finDataEntity.Price) * 100) * 15, 4);
+                finDataEntity.LowDDiff = Math.Round((((finDataEntity.LowD - finDataEntity.Price) / finDataEntity.Price) * 100) * 15, 4);
 
                 var tempRegion = Regions[rng.Next(6)];
                 finDataEntity.Region = tempRegion.RegionName;
@@ -96,10 +102,15 @@ namespace WebAPI.Models
 
                 newData[i] = finDataEntity;
             }
-            
+
             return newData;
         }
 
+        /// <summary>
+        /// Instead of returning a random date directly, why not return a generator function which can be called repeatedly to create a random date.
+        /// You get a factory first: var getRandomDate = RandomDayFunc(); then you call it to get random dates: var randomDate = getRandomDate(); Mind that you need to reuse getRandomDate.
+        /// </summary>
+        /// <returns></returns>
         Func<DateTime> RandomDayFunc()
         {
             DateTime start = new DateTime(1995, 1, 1);
@@ -108,22 +119,34 @@ namespace WebAPI.Models
             return () => start.AddDays(gen.Next(range));
         }
 
-        private void randomizeObjectData(FinancialData finData)
+        /// <summary>
+        /// Updates all Prices fields
+        /// </summary>
+        /// <param name="finData"></param>
+        public void updateAllPrices(FinancialData[] finData)
         {
-            PercentChange pc = generateNewPrice(finData.Price);
+            Random rnd = new Random();
+            for (int i = 0; i < finData.Length; i++)
+            {
+                randomizeObjectData(finData[rnd.Next(finData.Length)]);
+            }
+        }
 
-            finData.Change = Math.Round((pc.Price - finData.Price), 4);
-            finData.Price = Math.Round(pc.Price, 4);
-            finData.ChangeP = Math.Round(pc.ChangePercent, 4);
+        private void randomizeObjectData(FinancialData finDataObj)
+        {
+            PercentChange pc = generateNewPrice(finDataObj.Price);
+            finDataObj.Change = Math.Round((pc.Price - finDataObj.Price), 4);
+            finDataObj.Price = Math.Round(pc.Price, 4);
+            finDataObj.ChangeP = Math.Round(pc.ChangePercent, 4);
         }
 
         private PercentChange generateNewPrice(double price)
         {
             Random rnd = new Random();
             int volatility = 2;
-            double newPrice = 0;
+            double newPrice;
 
-            double changePercent = 2 * volatility * rnd.Next(100);
+            double changePercent = 2 * volatility * rnd.Next(7);
             if (changePercent > volatility) {
                 changePercent -= (2 * volatility);
             }
