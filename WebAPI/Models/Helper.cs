@@ -152,7 +152,7 @@ namespace WebAPI.Models
             int volatility = 2;
             double newPrice;
 
-            double changePercent = 2 * volatility * rnd.Next(7);
+            double changePercent = 2 * volatility * rnd.NextDouble();
             if (changePercent > volatility) {
                 changePercent -= (2 * volatility);
             }
