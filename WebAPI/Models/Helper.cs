@@ -62,6 +62,12 @@ namespace WebAPI.Models
         {
             "Forwards", "Futures", "Options", "Swap", "CFD"
         };
+
+        private static readonly string[] Summaries = new[]
+        {
+            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+        };
+
         /// <summary>
         /// Generates new data based on passed length
         /// </summary>
