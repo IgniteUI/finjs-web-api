@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -57,15 +58,18 @@ namespace WebAPI.Controllers
 
         public IActionResult Get()
         {
+            int recordsCount = 100;
             FinancialData[] dataArray = JsonConvert.DeserializeObject<List<FinancialData>>(jsonData).ToArray();
+            FinancialData[] newDataArray = new FinancialData[recordsCount];
             Helper helper = new Helper();
-            dataArray = helper.generatedata(dataArray, 100);
 
+            newDataArray = helper.generatedata(dataArray, recordsCount);
             // With the sendasync expression we are sending the data to all clients subscribed to transferdata event.
             // Every client that has a listener to this event will receive the data.
             var timerManager = new TimerManager(() => {
-                helper.updateAllPrices(dataArray);
-                _hub.Clients.All.SendAsync("transferdata", dataArray);
+                helper.updateAllPrices(newDataArray);
+
+                _hub.Clients.All.SendAsync("transferdata", newDataArray.OrderBy(item => item.ID).ToArray());
             });
 
             return Ok(new { Message = "Request Completed" });

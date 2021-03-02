@@ -18,7 +18,7 @@ namespace WebAPI.Models
         {
             _action = action;
             _autoResetEvent = new AutoResetEvent(false);
-            // It will start with 1 second delay for 100ms interval
+            // It will start with 0 seconds delay for 100ms interval
             _timer = new Timer(Execute, _autoResetEvent, 0, 100);
             TimerStarted = DateTime.Now;
         }

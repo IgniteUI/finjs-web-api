@@ -76,37 +76,34 @@ namespace WebAPI.Models
         /// <returns></returns>
         public FinancialData[] generatedata(FinancialData[] data, int newCount)
         {
-
             FinancialData[] newData = new FinancialData[newCount];
             var rng = new Random();
             var getRandomDate = RandomDayFunc();
-            FinancialData finDataEntity;
 
             for (int i = 0; i < newCount; i++)
             {
                 var randomIndex = rng.Next(data.Length);
-                finDataEntity = data[randomIndex];
+                // Copy object not by a reference
+                newData[i] = copyObjectByValue(data[randomIndex]);
                 // creates a number between 0 and 1
-                finDataEntity.Settlement = Settlements[rng.Next(2)];
-                finDataEntity.Contract = Contracts[rng.Next(5)];
-                finDataEntity.LastUpdated = getRandomDate();
-                finDataEntity.OpenPriceDiff = Math.Round((((finDataEntity.OpenPrice - finDataEntity.Price) / finDataEntity.Price) * 100) * 15, 4);
-                finDataEntity.BuyDiff = Math.Round((((finDataEntity.Buy - finDataEntity.Price) / finDataEntity.Price) * 100) * 15, 4);
-                finDataEntity.SellDiff = Math.Round((((finDataEntity.Sell - finDataEntity.Price) / finDataEntity.Price) * 100) * 15, 4);
-                finDataEntity.StartYDiff = Math.Round((((finDataEntity.StartY - finDataEntity.Price) / finDataEntity.Price) * 100) * 15, 4);
-                finDataEntity.HighYDiff = Math.Round((((finDataEntity.HighY - finDataEntity.Price) / finDataEntity.Price) * 100) * 15, 4);
-                finDataEntity.LowYDiff = Math.Round((((finDataEntity.LowY - finDataEntity.Price) / finDataEntity.Price) * 100) * 15, 4);
-                finDataEntity.HighDDiff = Math.Round((((finDataEntity.HighD - finDataEntity.Price) / finDataEntity.Price) * 100) * 15, 4);
-                finDataEntity.LowDDiff = Math.Round((((finDataEntity.LowD - finDataEntity.Price) / finDataEntity.Price) * 100) * 15, 4);
+                newData[i].Settlement = Settlements[rng.Next(2)];
+                newData[i].Contract = Contracts[rng.Next(5)];
+                newData[i].LastUpdated = getRandomDate();
+                newData[i].OpenPriceDiff = Math.Round((((newData[i].OpenPrice - newData[i].Price) / newData[i].Price) * 100) * 15, 4);
+                newData[i].BuyDiff = Math.Round((((newData[i].Buy - newData[i].Price) / newData[i].Price) * 100) * 15, 4);
+                newData[i].SellDiff = Math.Round((((newData[i].Sell - newData[i].Price) / newData[i].Price) * 100) * 15, 4);
+                newData[i].StartYDiff = Math.Round((((newData[i].StartY - newData[i].Price) / newData[i].Price) * 100) * 15, 4);
+                newData[i].HighYDiff = Math.Round((((newData[i].HighY - newData[i].Price) / newData[i].Price) * 100) * 15, 4);
+                newData[i].LowYDiff = Math.Round((((newData[i].LowY - newData[i].Price) / newData[i].Price) * 100) * 15, 4);
+                newData[i].HighDDiff = Math.Round((((newData[i].HighD - newData[i].Price) / newData[i].Price) * 100) * 15, 4);
+                newData[i].LowDDiff = Math.Round((((newData[i].LowD - newData[i].Price) / newData[i].Price) * 100) * 15, 4);
 
                 var tempRegion = Regions[rng.Next(6)];
-                finDataEntity.Region = tempRegion.RegionName;
-                finDataEntity.Country = tempRegion.Countries[rng.Next(tempRegion.Countries.Length)];
-                finDataEntity.ID = i;
+                newData[i].Region = tempRegion.RegionName;
+                newData[i].Country = tempRegion.Countries[rng.Next(tempRegion.Countries.Length)];
+                newData[i].ID = i;
 
-                randomizeObjectData(finDataEntity);
-
-                newData[i] = finDataEntity;
+                randomizeObjectData(newData[i]);
             }
 
             return newData;
@@ -165,6 +162,19 @@ namespace WebAPI.Models
             result.ChangePercent = Math.Round(changePercent, 4);
 
             return result;
+        }
+
+        /// <summary>
+        /// Serializes and Deserializes object in order to copy it by value instead of reference
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        private FinancialData copyObjectByValue(FinancialData obj)
+        {
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(obj);
+            FinancialData newObj = Newtonsoft.Json.JsonConvert.DeserializeObject<FinancialData>(json);
+
+            return newObj;
         }
     }
 }
