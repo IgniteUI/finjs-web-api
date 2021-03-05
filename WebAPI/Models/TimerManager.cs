@@ -11,7 +11,7 @@ namespace WebAPI.Models
         private Timer _timer;
         private AutoResetEvent _autoResetEvent;
         private Action _action;
-
+        private readonly CancellationTokenSource _cts = new CancellationTokenSource();
         public DateTime TimerStarted { get; set; }
 
         public TimerManager(Action action, int milliseconds = 100)
@@ -19,7 +19,7 @@ namespace WebAPI.Models
             _action = action;
             _autoResetEvent = new AutoResetEvent(false);
             // It will start with 0 seconds delay for 100ms interval
-            _timer = new Timer(Execute, _autoResetEvent, 0, milliseconds);
+            _timer = new Timer(Execute, _cts.Token, 0, milliseconds);
             TimerStarted = DateTime.Now;
         }
 
@@ -41,7 +41,9 @@ namespace WebAPI.Models
 
         public void Stop()
         {
+            _cts.Cancel();
             _timer.Dispose();
         }
+
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -17,6 +18,7 @@ namespace WebAPI.Controllers
     public class WebApiController : ControllerBase
     {
         private readonly IHubContext<StreamHub> _hubContext;
+        private Timer _timer;
 
         public TimerManager timerManager;
 

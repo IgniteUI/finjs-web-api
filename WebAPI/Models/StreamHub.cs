@@ -18,7 +18,7 @@ namespace WebAPI.Models
         {
 
         }
-        public void UpdateParameters(int ms, int volume)
+        public void UpdateParameters(int ms, int volume, bool live = false)
         {
             StopTimer();
 
@@ -26,17 +26,22 @@ namespace WebAPI.Models
             FinancialData[] newDataArray = new FinancialData[volume];
             newDataArray = helper.generatedata(dataArray, volume);
 
-            Debug.WriteLine("Ms: " + ms + ", Volume:" + volume);
-            Send(newDataArray);
+            if (live)
+            {
+                // With the sendasync expression we are sending the data to all clients subscribed to transferdata event.
+                // Every client that has a listener to this event will receive the data.
+                timerManager = new TimerManager(() =>
+                {
+                    helper.updateAllPrices(newDataArray);
 
-            // With the sendasync expression we are sending the data to all clients subscribed to transferdata event.
-            // Every client that has a listener to this event will receive the data.
-            //timerManager = new TimerManager(() =>
-            //{
-            //    helper.updateAllPrices(newDataArray);
-
-            //    Send(newDataArray);
-            //}, ms);
+                    Send(newDataArray);
+                }, ms);
+            }
+            else
+            {
+                StopTimer();
+                Send(newDataArray);
+            }
         }
         public async Task Send(FinancialData[] array)
         {
