@@ -11,7 +11,7 @@ namespace WebAPI.Models
 {
     public class StreamHub: Hub
     {
-        public TimerManager timerManager;
+        public static TimerManager timerManager;
         private Helper helper = new Helper();
 
         public StreamHub()
@@ -25,34 +25,39 @@ namespace WebAPI.Models
             FinancialData[] dataArray = JsonConvert.DeserializeObject<List<FinancialData>>(helper.jsonData).ToArray();
             FinancialData[] newDataArray = new FinancialData[volume];
             newDataArray = helper.generatedata(dataArray, volume);
+            var clients = Clients;
+            var connection = Context.ConnectionId;
 
             if (live)
             {
                 // With the sendasync expression we are sending the data to all clients subscribed to transferdata event.
                 // Every client that has a listener to this event will receive the data.
-                timerManager = new TimerManager(() =>
+                StreamHub.timerManager = new TimerManager(() =>
                 {
                     helper.updateAllPrices(newDataArray);
 
-                    Send(newDataArray);
+                    Send(newDataArray, clients);
                 }, ms);
             }
             else
             {
                 StopTimer();
-                Send(newDataArray);
+                Send(newDataArray, clients);
             }
         }
-        public async Task Send(FinancialData[] array)
+        public async Task Send(FinancialData[] array, IHubCallerClients c)
         {
             Debug.WriteLine("Items count: " + array.Length);
 
-            await Clients.Caller.SendAsync("transferdata", array);
+            await c.Caller.SendAsync("transferdata", array);
         }
 
         public void StopTimer()
         {
-            if (timerManager != null) { timerManager.Stop(); }
+            if (StreamHub.timerManager != null) { 
+                Console.WriteLine("StopTimer");
+                timerManager.Stop(); 
+            }
         }
     }
 }
