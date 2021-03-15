@@ -16,18 +16,22 @@ variables:
 
 steps:
 - task: NuGetToolInstaller@1
+  displayName: Install NuGet
 
 - task: NuGetCommand@2
+  displayName: Restore packages with NuGet
   inputs:
     restoreSolution: '$(solution)'
 
 - task: VSBuild@1
+  displayName: Build the project
   inputs:
     solution: '$(solution)'
     msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 - task: DotNetCoreCLI@2
+  displayName: Publish the project
   inputs:
     command: publish
     publishWebProjects: True
@@ -36,6 +40,7 @@ steps:
 
 # this code takes all the files in $(Build.ArtifactStagingDirectory) and uploads them as an artifact of your build.
 - task: PublishBuildArtifacts@1
+  displayName: Upload the artifact of the build with name 'webapi'
   inputs:
     pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
-    artifactName: 'myWebsiteName'
+    artifactName: 'webapi'
