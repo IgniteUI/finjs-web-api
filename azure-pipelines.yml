@@ -22,17 +22,21 @@ steps:
   displayName: Restore packages with NuGet
   inputs:
     restoreSolution: '$(solution)'
-
-- task: VSBuild@1
+- task: DotNetCoreCLI@2
   displayName: Build the project
   inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    command: 'build'
+    projects: '**/*.csproj'
+# - task: VSBuild@1
+#   displayName: Build the project
+#   inputs:
+#     solution: '$(solution)'
+#     msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
+#     platform: '$(buildPlatform)'
+#     configuration: '$(buildConfiguration)'
 - task: DotNetCoreCLI@2 
   # DotNetCoreCLI task to publish the binary files into a folder for deployment
-  displayName: Publish the project
+  displayName: Publish the project (dotnet publish)
   inputs:
     command: publish
     publishWebProjects: True
