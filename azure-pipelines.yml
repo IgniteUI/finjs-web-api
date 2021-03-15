@@ -30,7 +30,8 @@ steps:
     msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
-- task: DotNetCoreCLI@2
+- task: DotNetCoreCLI@2 
+  # DotNetCoreCLI task to publish the binary files into a folder for deployment
   displayName: Publish the project
   inputs:
     command: publish
@@ -38,8 +39,9 @@ steps:
     arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
     zipAfterPublish: True
 
-# this code takes all the files in $(Build.ArtifactStagingDirectory) and uploads them as an artifact of your build.
+# This code takes all the files in $(Build.ArtifactStagingDirectory) and uploads them as an artifact of your build.
 - task: PublishBuildArtifacts@1
+  # PublishBuildArtifact task to copy the folder into a shared location accessible by the release pipeline
   displayName: Upload the artifact of the build with name 'webapi'
   inputs:
     pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
