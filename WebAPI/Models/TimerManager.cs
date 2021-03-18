@@ -9,18 +9,15 @@ namespace WebAPI.Models
     public class TimerManager
     {
         private Timer _timer;
-        private AutoResetEvent _autoResetEvent;
+        private int updateInterval = 500;
         private Action _action;
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
-        public DateTime TimerStarted { get; set; }
 
-        public TimerManager(Action action, int milliseconds = 100)
+        public TimerManager(Action action, int milliseconds)
         {
             _action = action;
-            _autoResetEvent = new AutoResetEvent(false);
-            // It will start with 0 seconds delay for 100ms interval
-            _timer = new Timer(Execute, _cts.Token, 0, milliseconds);
-            TimerStarted = DateTime.Now;
+            updateInterval = milliseconds;
+            _timer = new Timer(Execute, _cts.Token, 0, updateInterval);
         }
 
         /// <summary>
@@ -32,11 +29,12 @@ namespace WebAPI.Models
         public void Execute(object stateInfo)
         {
             _action();
-            // Run for 10 minutes or stop it manually
-            if ((DateTime.Now - TimerStarted).Seconds > 600)
-            {
-                _timer.Dispose();
-            }
+        }
+
+        public void UpdateInterval(int interval)
+        {
+            updateInterval = interval;
+            _timer.Change(0, interval);
         }
 
         public void Stop()

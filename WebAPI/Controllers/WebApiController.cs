@@ -18,9 +18,7 @@ namespace WebAPI.Controllers
     public class WebApiController : ControllerBase
     {
         private readonly IHubContext<StreamHub> _hubContext;
-        private Timer _timer;
 
-        public TimerManager timerManager;
 
         /// <summary>
         /// We are using the IHubContext and creating its instance via dependency injection. By using this instance object we are able to access and call the hub methods.
