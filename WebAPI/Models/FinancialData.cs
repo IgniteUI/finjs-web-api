@@ -10,7 +10,6 @@ namespace WebAPI
         private string _type;
 
         public string Category { get; set; }
-        //public string Category => Categories[new Random().Next(Categories.Length)];
         public string Type
         {
             get
@@ -22,26 +21,6 @@ namespace WebAPI
             {
                 _type = value;
             }
-
-            //set
-            //{
-            //    string type = "";
-            //    var rnd = new Random();
-
-            //    switch (Category)
-            //    {
-            //        case "Metal":
-            //            type = Metals[rnd.Next(Metals.Length)];
-            //            break;
-            //        case "Oil":
-            //            type = Oils[rnd.Next(Oils.Length)];
-            //            break;
-            //        default:
-            //            break;
-            //    }
-
-            //    _type = type;
-            //}
         }
         public double Spread { get; set; }
         public double OpenPrice { get; set; }
