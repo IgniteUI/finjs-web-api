@@ -2,9 +2,6 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace WebAPI.Models
@@ -13,14 +10,14 @@ namespace WebAPI.Models
     {
         public static IDictionary<string, TimerManager> clientConnections =
             new Dictionary<string, TimerManager>();
+        private static FinancialData[] newDataArray;
         private Helper helper = new Helper();
 
         public StreamHub() { }
 
-        public async void UpdateParameters(int interval, int volume, bool live = false)
+        public async void UpdateParameters(int interval, int volume, bool live = false, bool updateAll = true)
         {
             FinancialData[] dataArray = JsonConvert.DeserializeObject<List<FinancialData>>(helper.jsonData).ToArray();
-            FinancialData[] newDataArray = new FinancialData[volume];
             newDataArray = helper.generatedata(dataArray, volume);
             var connection = Context.ConnectionId;
             var clients = Clients;
@@ -32,7 +29,14 @@ namespace WebAPI.Models
                     clientConnections.Add(connection, new TimerManager(async() =>
                     {
                         var client = clients.Client(connection);
-                        helper.updateAllPrices(newDataArray);
+                        if (updateAll)
+                        {
+                            helper.updateAllPrices(newDataArray);
+                        }
+                        else
+                        {
+                            helper.updateRandomPrices(newDataArray);
+                        }
                         await Send(newDataArray, client, connection);
                     }, interval));
                 } else
@@ -41,7 +45,14 @@ namespace WebAPI.Models
                     clientConnections[connection] = new TimerManager(async () =>
                     {
                         var client = clients.Client(connection);
-                        helper.updateAllPrices(newDataArray);
+                        if (updateAll)
+                        {
+                            helper.updateAllPrices(newDataArray);
+                        }
+                        else
+                        {
+                            helper.updateRandomPrices(newDataArray);
+                        }
                         await Send(newDataArray, client, connection);
                     }, interval);
                 }
