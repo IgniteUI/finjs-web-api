@@ -131,8 +131,8 @@ namespace WebAPI.Models
         public void updateRandomPrices(FinancialData[] finData)
         {
             Random rnd = new Random();
-            int counter = (int)(0.1 * finData.Length);
-            for (int i = 0; i <= counter; i++)
+            int counter = finData.Length <= 10 ? finData.Length : (int)(0.1 * finData.Length);
+            for (int i = 0; i < counter; i++)
             {
                 randomizeObjectData(finData[rnd.Next(finData.Length)]);
             }
