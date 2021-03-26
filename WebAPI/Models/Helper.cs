@@ -128,12 +128,23 @@ namespace WebAPI.Models
         /// Updates all Prices fields
         /// </summary>
         /// <param name="finData"></param>
-        public void updateAllPrices(FinancialData[] finData)
+        public void updateRandomPrices(FinancialData[] finData)
         {
             Random rnd = new Random();
-            for (int i = 0; i < finData.Length; i++)
+            int counter = finData.Length <= 10 ? finData.Length : (int)(0.1 * finData.Length);
+            for (int i = 0; i < counter; i++)
             {
                 randomizeObjectData(finData[rnd.Next(finData.Length)]);
+            }
+        }
+
+        public void updateAllPrices(FinancialData[] finData)
+        {
+     
+            for (int i = 0; i <= finData.Length / 2; i++)
+            {
+                randomizeObjectData(finData[i]);
+                randomizeObjectData(finData[finData.Length - 1 - i]);
             }
         }
 
@@ -161,7 +172,7 @@ namespace WebAPI.Models
 
             PercentChange result = new PercentChange();
             result.Price = Math.Round(newPrice, 4);
-            result.ChangePercent = Math.Round(changePercent, 4);
+            result.ChangePercent = Math.Round(changePercent, 4) / 100;
 
             return result;
         }

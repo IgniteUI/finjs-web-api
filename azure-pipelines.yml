@@ -1,0 +1,52 @@
+# ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+steps:
+- task: NuGetToolInstaller@1
+  displayName: Install NuGet
+
+- task: NuGetCommand@2
+  displayName: Restore packages with NuGet
+  inputs:
+    restoreSolution: '$(solution)'
+- task: DotNetCoreCLI@2
+  displayName: Build the project
+  inputs:
+    command: 'build'
+    projects: '**/*.csproj'
+# - task: VSBuild@1
+#   displayName: Build the project
+#   inputs:
+#     solution: '$(solution)'
+#     msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
+#     platform: '$(buildPlatform)'
+#     configuration: '$(buildConfiguration)'
+- task: DotNetCoreCLI@2 
+  # DotNetCoreCLI task to publish the binary files into a folder for deployment
+  displayName: Publish the project (dotnet publish)
+  inputs:
+    command: publish
+    publishWebProjects: True
+    arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    zipAfterPublish: True
+
+# This code takes all the files in $(Build.ArtifactStagingDirectory) and uploads them as an artifact of your build.
+- task: PublishBuildArtifacts@1
+  # PublishBuildArtifact task to copy the folder into a shared location accessible by the release pipeline
+  displayName: Upload the artifact of the build with name 'webapi'
+  inputs:
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
+    artifactName: 'webapi'

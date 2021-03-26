@@ -2,62 +2,88 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace WebAPI.Models
 {
     public class StreamHub: Hub
     {
-        public static TimerManager timerManager;
+        public static IDictionary<string, TimerManager> clientConnections =
+            new Dictionary<string, TimerManager>();
+        private static FinancialData[] newDataArray;
         private Helper helper = new Helper();
 
-        public StreamHub()
-        {
+        public StreamHub() { }
 
-        }
-        public void UpdateParameters(int ms, int volume, bool live = false)
+        public async void UpdateParameters(int interval, int volume, bool live = false, bool updateAll = true)
         {
-            StopTimer();
-
             FinancialData[] dataArray = JsonConvert.DeserializeObject<List<FinancialData>>(helper.jsonData).ToArray();
-            FinancialData[] newDataArray = new FinancialData[volume];
             newDataArray = helper.generatedata(dataArray, volume);
-            var clients = Clients;
             var connection = Context.ConnectionId;
+            var clients = Clients;
 
             if (live)
             {
-                // With the sendasync expression we are sending the data to all clients subscribed to transferdata event.
-                // Every client that has a listener to this event will receive the data.
-                StreamHub.timerManager = new TimerManager(() =>
+                if (!clientConnections.ContainsKey(connection))
                 {
-                    helper.updateAllPrices(newDataArray);
-
-                    Send(newDataArray, clients);
-                }, ms);
+                    clientConnections.Add(connection, new TimerManager(async() =>
+                    {
+                        var client = clients.Client(connection);
+                        if (updateAll)
+                        {
+                            helper.updateAllPrices(newDataArray);
+                        }
+                        else
+                        {
+                            helper.updateRandomPrices(newDataArray);
+                        }
+                        await Send(newDataArray, client, connection);
+                    }, interval));
+                } else
+                {
+                    clientConnections[connection].Stop();
+                    clientConnections[connection] = new TimerManager(async () =>
+                    {
+                        var client = clients.Client(connection);
+                        if (updateAll)
+                        {
+                            helper.updateAllPrices(newDataArray);
+                        }
+                        else
+                        {
+                            helper.updateRandomPrices(newDataArray);
+                        }
+                        await Send(newDataArray, client, connection);
+                    }, interval);
+                }
             }
             else
             {
-                StopTimer();
-                Send(newDataArray, clients);
+                var client = clients.Client(connection);
+                await Send(newDataArray, client, connection);
             }
         }
-        public async Task Send(FinancialData[] array, IHubCallerClients c)
-        {
-            Debug.WriteLine("Items count: " + array.Length);
 
-            await c.Caller.SendAsync("transferdata", array);
+        public async Task Send(FinancialData[] array, IClientProxy client, string connection)
+        {
+            await client.SendAsync("transferdata", array);
         }
 
         public void StopTimer()
         {
-            if (StreamHub.timerManager != null) { 
-                Console.WriteLine("StopTimer");
+            TimerManager timerManager;
+            clientConnections.TryGetValue(Context.ConnectionId, out timerManager);
+            if (timerManager != null) {
                 timerManager.Stop(); 
             }
         }
+
+        public override Task OnDisconnectedAsync(Exception exception)
+        {
+            StopTimer();
+            clientConnections.Remove(Context.ConnectionId);
+            return base.OnDisconnectedAsync(exception);
+        }
+
     }
 }
