@@ -44,3 +44,5 @@ Another way to stop the live feed is by using the `StopTimer` service method
 this.hubConnection.invoke('StopTimer')
     .catch(err => console.error(err));
 ```
+
+test CI
